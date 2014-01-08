@@ -106,11 +106,13 @@ class MFRC522:
     spi.openSPI(speed=spd)
     if not GPIO:
       import RPi.GPIO as GPIO
-      self.GPIO.setmode(GPIO.BCM)
-
+    
+    
+    self.GPIO = GPIO
+    self.GPIO.setmode(GPIO.BCM)
     self.NRSTPD = NRSTPDpin;
-    GPIO.setup(self.NRSTPD, GPIO.OUT)
-    GPIO.output(self.NRSTPD, 1)
+    self.GPIO.setup(self.NRSTPD, GPIO.OUT)
+    self.GPIO.output(self.NRSTPD, 1)
     self.MFRC522_Init()
   
   def MFRC522_Reset(self):
@@ -356,7 +358,7 @@ class MFRC522:
   
   
   def MFRC522_Init(self):
-    GPIO.output(self.NRSTPD, 1)
+    self.GPIO.output(self.NRSTPD, 1)
   
     self.MFRC522_Reset();
     
@@ -370,34 +372,5 @@ class MFRC522:
     self.Write_MFRC522(self.ModeReg, 0x3D)
     self.AntennaOn()
   
-continue_reading = True
-# Capture SIGINT
-def end_read(signal,frame):
-  global continue_reading
-  print "Ctrl+C captured, ending read."
-  continue_reading = False
-  GPIO.cleanup() # Suggested by Marjan Trutschl
-  
-signal.signal(signal.SIGINT, end_read)
-  
-MIFAREReader = MFRC522()
-  
-while continue_reading:
-  (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
-  
-  if status == MIFAREReader.MI_OK:
-    print "Card detected"
-  
-  (status,backData) = MIFAREReader.MFRC522_Anticoll()
-  if status == MIFAREReader.MI_OK:
-    print "Card read UID: "+str(backData[0])+","+str(backData[1])+","+str(backData[2])+","+str(backData[3])+","+str(backData[4])
- 
-    key = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
-  
-    MIFAREReader.MFRC522_SelectTag(backData)
 
-    status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 11, key, backData)
-    if status == MIFAREReader.MI_OK:
-      print "AUTH OK"
-    else:
-      print "AUTH ERROR"
+  

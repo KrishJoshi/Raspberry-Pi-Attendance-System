@@ -1,0 +1,15 @@
+pin_rs=4
+pin_e=24
+pins_db=[23, 17, 21, 22]
+
+import RPi.GPIO as GPIO
+
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(self.pin_e, GPIO.OUT)
+GPIO.setup(self.pin_rs, GPIO.OUT)
+
+for pin in self.pins_db:
+  self.GPIO.setup(pin, GPIO.OUT)
+
+GPIO.output(21, True)

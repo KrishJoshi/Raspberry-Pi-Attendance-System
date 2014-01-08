@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 from time import sleep
-import lcd_hd44780
-import RPi.GPIO as GPIO
-import MFRC522
+from lcd_hd44780 import lcd_hd44780 as lcd
+from MFRC522 import MFRC522 as nfc
 ''' Funct 	NFC 	LCD
 1 	3.3v	3.3V	VCC 
 2 	5v 				2
@@ -33,31 +32,40 @@ import MFRC522
 26:
 '''
 
-
-def __init__(self, lcd_pin_rs=25, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
-    self.GPIO = GPIO
-    self.GPIO.setmode(GPIO.BCM)
-    # TODO: Set modes of both arn't set properly - check NFC before test
-    self.lcd = lcd_hd44780(lcd_pin_rs, lcd_pin_e, lcd_pins_db, GPIO)
-    self.nfc =  MFRC522() 
-    self.lcd.clear()
-
-    self.clear()
-
-def cleanGPIO():
-	GPIO.cleanup()
-
-def displayMessage(text):
-	lcd.message(text)
-
-def poolNFC():
-	while  continue_reading:
-  		(Status, TagType) =  nfc.MFRC522_Request (nfc.PICC_REQIDL)
-  
-		if  status = =  nfc.MI_OK:
-			print  "Card detected"
-
-		(Status, Backdata) =  nfc.MFRC522_Anticoll ()
-		if  status = =  nfc.MI_OK:
-			print  "Number of the card: " + str (backData[ 0 ]) + "," + str (backData[ 1 ]) + "," + str (backData[ 2 ]) + "," + str (backData[ 3 ]) + "," + str (backData[ 4 ])
-
+class Hardware:
+	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
+	    # TODO: Set modes of both arn't set properly - check NFC before test
+	    self.lcd = lcd()
+	    self.nfc =  nfc() 
+	
+	
+	def cleanGPIO():
+		GPIO.cleanup()
+	
+	def displayMessage(self,text):
+		self.lcd.clear()
+		self.lcd.message(text)
+	
+	def poolNFC(self):
+		continue_reading = True
+		while continue_reading:
+		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
+		  
+		  if status == self.nfc.MI_OK:
+		    print "Card detected"
+		  
+		  (status,backData) = self.nfc.MFRC522_Anticoll()
+		  if status == self.nfc.MI_OK:
+			 id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
+ 			 continue_reading = False
+			 return id
+	
+if __name__ == '__main__':
+   	hardware = Hardware()
+	id = hardware.poolNFC()
+	if id == '63109129125174':
+		message = "ID Found"
+	else:
+		message = 'ID Not Found'
+	hardware.displayMessage(id + '\n' + message)
+	

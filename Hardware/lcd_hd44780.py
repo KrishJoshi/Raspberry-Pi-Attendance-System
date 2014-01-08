@@ -54,6 +54,7 @@ class lcd_hd44780:
     LCD_MOVERIGHT                 = 0x04
     LCD_MOVELEFT                 = 0x00
 
+
     # flags for function set
     LCD_8BITMODE                 = 0x10
     LCD_4BITMODE                 = 0x00
@@ -64,11 +65,12 @@ class lcd_hd44780:
 
 
 
-    def __init__(self, pin_rs=25, pin_e=24, pins_db=[23, 17, 21, 22], GPIO = None):
+    def __init__(self, pin_rs=4, pin_e=24, pins_db=[23, 17, 27, 22], GPIO = None):
         # If we haven't been given
         # an explicit GPIO interface to use
         if not GPIO:
             import RPi.GPIO as GPIO
+	    
         self.GPIO = GPIO
         self.pin_rs = pin_rs
         self.pin_e = pin_e
@@ -103,7 +105,7 @@ class lcd_hd44780:
 
         if (lines > 1):
                 self.numlines = lines
-                    self.displayfunction |= self.LCD_2LINE
+                self.displayfunction |= self.LCD_2LINE
                 self.currline = 0
 
 
@@ -238,7 +240,7 @@ class lcd_hd44780:
         self.pulseEnable()
 
 
-    def delayMicroseconds(self, microseconds):
+    def delayMicroseconds(self,microseconds):
         seconds = microseconds / float(1000000)        # divide microseconds by 1 million for seconds
         sleep(seconds)
 
@@ -264,7 +266,7 @@ class lcd_hd44780:
 
 if __name__ == '__main__':
 
-    lcd = LCD()
+    lcd = lcd_hd44780()
 
     lcd.clear()
-    lcd.message(" 16x2\n  Standard LCD")
+    lcd.message("Hello\nWorld")
