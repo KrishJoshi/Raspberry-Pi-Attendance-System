@@ -1,4 +1,3 @@
-import RPi.GPIO as GPIO
 import spi
 import signal
   
@@ -103,10 +102,14 @@ class MFRC522:
     
   serNum = []
   
-  def __init__(self,spd=1000000):
+  def __init__(self,spd=1000000, NRSTPDpin = 25, GPIO = None):
     spi.openSPI(speed=spd)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(22, GPIO.OUT)
+    if not GPIO:
+      import RPi.GPIO as GPIO
+      self.GPIO.setmode(GPIO.BCM)
+
+    self.NRSTPD = NRSTPDpin;
+    GPIO.setup(self.NRSTPD, GPIO.OUT)
     GPIO.output(self.NRSTPD, 1)
     self.MFRC522_Init()
   

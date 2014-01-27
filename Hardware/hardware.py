@@ -36,9 +36,11 @@ import MFRC522
 
 def __init__(self, lcd_pin_rs=25, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
     self.GPIO = GPIO
+    self.GPIO.setmode(GPIO.BCM)
+    # TODO: Set modes of both arn't set properly - check NFC before test
     self.lcd = lcd_hd44780(lcd_pin_rs, lcd_pin_e, lcd_pins_db, GPIO)
     self.nfc =  MFRC522() 
-    
+    self.lcd.clear()
 
     self.clear()
 
@@ -46,9 +48,7 @@ def cleanGPIO():
 	GPIO.cleanup()
 
 def displayMessage(text):
-	lcd.dis
-
-
+	lcd.message(text)
 
 def poolNFC():
 	while  continue_reading:
