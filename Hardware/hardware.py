@@ -45,6 +45,7 @@ class Hardware:
 	def displayMessage(self,text):
 		self.lcd.clear()
 		self.lcd.message(text)
+
 	
 	def poolNFC(self):
 		continue_reading = True
@@ -59,6 +60,19 @@ class Hardware:
 			 id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
  			 continue_reading = False
 			 return id
+
+	def getBarcode(self):
+		import os
+		p=os.popen('zbarcam --nodisplay','r')
+		print 'scanning'
+		while True:
+		        barcode = p.readline()
+		        print 'Got barcode:', barcode
+		        #The returned code is made up of 2 parts, the type : data
+		        type = barcode.split(':')[0]
+		        print type +' '
+		        code = barcode.split(':')[1]
+		        print code +' '+str(len(code))
 	
 if __name__ == '__main__':
    	hardware = Hardware()
