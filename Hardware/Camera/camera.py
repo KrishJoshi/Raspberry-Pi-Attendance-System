@@ -2,80 +2,49 @@ import os
 import sys
 import cv
 import time
-from zxing import *
+import zbar
 
-#### Code for BARCODE detection  ######
-def findBarcode(image):
-	imgco = image
-	img = cv.CreateImage(cv.GetSize(imgco),8,1)
-	imgx = cv.CreateImage(cv.GetSize(img),cv.IPL_DEPTH_16S,1)
-	imgy = cv.CreateImage(cv.GetSize(img),cv.IPL_DEPTH_16S,1)
-	thresh = cv.CreateImage(cv.GetSize(img),8,1)
-
-	### Convert image to grayscale ###
-	cv.CvtColor(imgco,img,cv.CV_BGR2GRAY)
-
-	### Finding horizontal and vertical gradient ###
-
-	cv.Sobel(img,imgx,1,0,3)
-	cv.Abs(imgx,imgx)
-
-	cv.Sobel(img,imgy,0,1,3)
-	cv.Abs(imgy,imgy)
-
-	cv.Sub(imgx,imgy,imgx)
-	cv.ConvertScale(imgx,img)
-
-	### Low pass filtering ###
-	cv.Smooth(img,img,cv.CV_GAUSSIAN,7,7,0)
-
-	### Applying Threshold ###
-	cv.Threshold(img,thresh,100,255,cv.CV_THRESH_BINARY)
-
-	cv.Erode(thresh,thresh,None,2)
-	cv.Dilate(thresh,thresh,None,5)
-	bar = 0
-	### Contour finding with max. area ###
-	storage = cv.CreateMemStorage(0)
-	contour = cv.FindContours(thresh, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_SIMPLE)
-	area = 0
-	while contour:
-	    max_area = cv.ContourArea(contour)
-	    if max_area>area:
-	        area = max_area
-	        bar = list(contour) 
-	    contour=contour.h_next()
-	if (bar != 0):
-		### Draw bounding rectangles ###
-		bound_rect = cv.BoundingRect(bar)
-		pt1 = (bound_rect[0], bound_rect[1])
-		pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
-		cv.Rectangle(imgco, pt1, pt2, cv.CV_RGB(0,255,255), 2)
-		cv.ShowImage('img',imgco)    
-		time.sleep(1)
-
-def imageCapture(imageName):
+def imageCapture(showImage = False):
 	camera_index = 0
 	capture = cv.CaptureFromCAM(camera_index)
-	time.sleep(0.3)
-	frame = cv.QueryFrame(capture)
-	#barcode = frame.findBarcode()
-	#print barcode.data
-	#findBarcode(frame)
-	cv.ShowImage('img',frame)   
-	cv.SaveImage(imageName + ".jpg", frame)
-	reader = zxing.BarCodeReader("/var/opt/zxing")
-	barcode = reader.decode(imageName + ".jpg")
-	output = os.system("zbarimg --raw -q "+ imageName +".jpg ")
-	
-	print barcode
-	#return barcode
-	
+	time.sleep(0.1)
 
-imageName = 0
-while True:
-	imageName += 1
-	imageN = str(imageName)
-	imageCapture(imageN)
-	
+	img = cv.QueryFrame(capture)
+	if(showImage == True):
+		cv.imshow('Test image', img)
+
+
+	return img
+
+def getBarcode():
+	img = imageCapture()
+	img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY )
+
+	width = img.width
+	height = img.height
+	raw = img.tostring()
+
+	# wrap image data
+	image = zbar.Image(width, height, 'Y800', raw)
+
+	# create a reader
+	scanner = zbar.ImageScanner()
+
+	# configure the reader
+	scanner.parse_config('enable')
+	# scan the image for barcodes
+	scanner.scan(image)
+
+	# extract results
+	for symbol in image:
+	    # do something useful with results
+	    print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
+
+	if (image.symbol != None):
+		return image.symbol
+	else
+		return ""
+
+if __name__ == '__main__':
+   	print imageCapture()
 

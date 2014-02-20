@@ -3,7 +3,9 @@
 from time import sleep
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
-''' Funct 	NFC 	LCD
+import camera
+''' 
+	Funct 	NFC 	LCD
 1 	3.3v	3.3V	VCC 
 2 	5v 				2
 3:
@@ -46,10 +48,10 @@ class Hardware:
 		self.lcd.clear()
 		self.lcd.message(text)
 
-	
-	def poolNFC(self):
-		continue_reading = True
-		while continue_reading:
+	shutdown = False
+	dataList = []
+	def poolNFC(self, queue):
+		while !shutdown:
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
 		  if status == self.nfc.MI_OK:
@@ -58,22 +60,47 @@ class Hardware:
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
 		  if status == self.nfc.MI_OK:
 			 id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
- 			 continue_reading = False
-			 return id
+			 queue.put(id, "RFID") 
 
-	def getBarcode(self):
-		import os
-		p=os.popen('zbarcam --nodisplay','r')
-		print 'scanning'
-		while True:
-		        barcode = p.readline()
-		        print 'Got barcode:', barcode
-		        #The returned code is made up of 2 parts, the type : data
-		        type = barcode.split(':')[0]
-		        print type +' '
-		        code = barcode.split(':')[1]
-		        print code +' '+str(len(code))
-	
+
+	def poolCamera(self, queue):
+		while !shutdown:
+			data = camera.getBarcode()
+			if(data != ""):
+				queue.put(data, "Barcode") 
+
+	def poolDevices(self):
+
+		shutdown = False
+		replyQueue = Queue.Queue()
+
+		thread1 = threading.Thread(poolNFC(self, my_queue))
+		thread2 = threading.Thread(getBarcode(self, my_queue))
+
+		thread1.start()
+		thread2.start()
+
+		endTime = datetime.datetime.now()  + datetime.timedelta(minutes = 15)
+ 		currentTime = datetime.datetime.now()
+
+		while (currentTime < endTime):
+			currentTime = datetime.datetime.now()
+			if(!replyQueue.empty):
+				data, dataType = queue.get()
+				if data not in dataList:
+					dataList.append(data)
+					displayMessage(dataType + ": " + data)
+				
+		shutdown = True
+
+		thread1.join()
+		thread2.join()
+
+		
+		if(!replyQueue.empty):
+			displayMessage("Queue isn't empty")
+		
+
 if __name__ == '__main__':
    	hardware = Hardware()
 	id = hardware.poolNFC()
