@@ -38,7 +38,7 @@ from db import database
 '''
 
 class Hardware:
-	def isDeviceActive(deviceName):
+	def isDeviceActive(self, deviceName):
 		return deviceName in ActiveDevices
 
 	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
