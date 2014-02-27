@@ -101,7 +101,7 @@ class Hardware:
 	 		
 			while (currentTime < endTime):
 				currentTime = datetime.datetime.now()
-				if(!replyQueue.empty):
+				if(replyQueue.empty != True):
 					data, dataType = queue.get()
 					if data not in dataList:
 						dataList.append(data)
