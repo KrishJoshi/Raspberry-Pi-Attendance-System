@@ -38,22 +38,22 @@ from db import database
 '''
 
 class Hardware:
-	def config.isDeviceActive(deviceName):
+	def isDeviceActive(deviceName):
 		return deviceName in ActiveDevices
 
 	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
 	    # TODO: Set modes of both arn't set properly - check NFC before test
-	    if(config.isDeviceActive('lcd')):
+	    if(self.isDeviceActive('lcd')):
 	    	self.lcd = lcd()
 
-	    if(config.isDeviceActive('nfc')):
+	    if(self.isDeviceActive('nfc')):
 	    	self.nfc =  nfc() 
 	
 	def cleanGPIO():
 		GPIO.cleanup()
 	
 	def displayMessage(self,text):
-		if(config.isDeviceActive('lcd')):
+		if(self.isDeviceActive('lcd')):
 			self.lcd.clear()
 			self.lcd.message(text)
 		else:
@@ -86,12 +86,12 @@ class Hardware:
 		shutdown = False
 		replyQueue = Queue.Queue()
 
-		if(config.isDeviceActive('nfc') or config.isDeviceActive('camera') ):
-			if(config.isDeviceActive('nfc')):
+		if(self.isDeviceActive('nfc') or self.isDeviceActive('camera') ):
+			if(self.isDeviceActive('nfc')):
 				thread1 = threading.Thread(poolNFC(self, my_queue))
 				thread1.start()
 
-			if(config.isDeviceActive('camera')):
+			if(self.isDeviceActive('camera')):
 				thread2 = threading.Thread(getBarcode(self, my_queue))
 				thread2.start()
 
@@ -110,9 +110,9 @@ class Hardware:
 					
 			shutdown = True
 
-			if(config.isDeviceActive('nfc')):
+			if(self.isDeviceActive('nfc')):
 				thread1.join()
-			if(config.isDeviceActive('camera')):
+			if(self.isDeviceActive('camera')):
 				thread2.join()
 			
 			if(replyQueue.empty != True and config.Testing == True):
