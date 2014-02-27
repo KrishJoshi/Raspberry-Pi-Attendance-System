@@ -66,7 +66,7 @@ class Hardware:
 		while (shutdown == False):
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
-		  if (status == self.nfc.MI_OK && config.Testing == True):
+		  if (status == self.nfc.MI_OK and config.Testing == True):
 		    print "Card detected"
 		  
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
@@ -86,7 +86,7 @@ class Hardware:
 		shutdown = False
 		replyQueue = Queue.Queue()
 
-		if(isDeviceActive('nfc') || isDeviceActive('camera') ):
+		if(isDeviceActive('nfc') or isDeviceActive('camera') ):
 			if(isDeviceActive('nfc')):
 				thread1 = threading.Thread(poolNFC(self, my_queue))
 				thread1.start()
