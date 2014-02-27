@@ -1,18 +1,33 @@
-import os
-import sys
-import cv
 import time
 import zbar
+import io
+import picamera
+import cv2
+import numpy as np
+import config
 
-def imageCapture(showImage = False):
-	camera_index = 0
-	capture = cv.CaptureFromCAM(camera_index)
-	time.sleep(0.1)
+def imageCapture():
 
-	img = cv.QueryFrame(capture)
-	if(showImage == True):
+	# Create the in-memory stream
+	stream = io.BytesIO()
+
+	with picamera.PiCamera() as camera:
+	    camera.start_preview()
+	    time.sleep(2)
+	    camera.capture(stream, format='jpeg')
+
+	# Construct a numpy array from the stream
+	data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+
+	# "Decode" the image from the array, preserving colour
+	img = cv2.imdecode(data, 1)
+
+	# OpenCV returns an array with data in BGR order. If you want RGB instead
+	# use the following...
+	img = img[:, :, ::-1]
+
+	if(config.Testing == True):
 		cv.imshow('Test image', img)
-
 
 	return img
 
@@ -38,7 +53,8 @@ def getBarcode():
 	# extract results
 	for symbol in image:
 	    # do something useful with results
-	    print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
+	    if(config.Testing == True):
+	    	print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
 
 	if (image.symbol != None):
 		return image.symbol

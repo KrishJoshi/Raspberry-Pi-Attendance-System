@@ -3,7 +3,7 @@
 from time import sleep
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
-import camera
+from camera import camera
 import config
 from db import database
 
@@ -123,10 +123,10 @@ class Hardware:
 
 if __name__ == '__main__':
    	hardware = Hardware()
-	id = hardware.poolNFC()
-	if id == '63109129125174':
-		message = "ID Found"
-	else:
-		message = 'ID Not Found'
-	hardware.displayMessage(id + '\n' + message)
+	hardware.poolDevices()
+	#if id == '63109129125174':
+	#	message = "ID Found"
+	#else:
+	#	message = 'ID Not Found'
+	#hardware.displayMessage(id + '\n' + message)
 	
