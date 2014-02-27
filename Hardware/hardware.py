@@ -6,6 +6,7 @@ from MFRC522 import MFRC522 as nfc
 import camera
 import config
 from db import database
+import queue
 
 ''' 
 	Funct 	NFC 	LCD
