@@ -3,7 +3,7 @@
 from time import sleep
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
-from camera import camera
+import camera
 import config
 from db import database
 
