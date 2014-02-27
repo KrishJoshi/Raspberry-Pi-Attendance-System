@@ -4,6 +4,9 @@ from time import sleep
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
 import camera
+import configurations
+from db import database
+
 ''' 
 	Funct 	NFC 	LCD
 1 	3.3v	3.3V	VCC 
@@ -27,7 +30,7 @@ import camera
 19: MOSI 	MOSI 	
 20:
 21: MISO 	MISO
-22: IO 25 	RST 	4 (FIX)
+22: IO 25 	RST 	4 
 23:	SCK 	SCK
 24: CE0 	SDA
 25: 
@@ -35,26 +38,38 @@ import camera
 '''
 
 class Hardware:
+	def isDeviceActive(deviceName):
+		return deviceName in ActiveDevices
+
 	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
 	    # TODO: Set modes of both arn't set properly - check NFC before test
-	    self.lcd = lcd()
-	    self.nfc =  nfc() 
+	    if(isDeviceActive('lcd')):
+	    	self.lcd = lcd()
+
+	    if(isDeviceActive('nfc')):
+	    	self.nfc =  nfc() 
 	
+	def 
 	
 	def cleanGPIO():
 		GPIO.cleanup()
 	
 	def displayMessage(self,text):
-		self.lcd.clear()
-		self.lcd.message(text)
+		if(isDeviceActive('lcd')):
+			self.lcd.clear()
+			self.lcd.message(text)
+		else:
+			print ("LCD doesn't exist, using print function")
+			print (text)
+	def 
 
 	shutdown = False
 	dataList = []
 	def poolNFC(self, queue):
-		while !shutdown:
+		while (shutdown == False):
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
-		  if status == self.nfc.MI_OK:
+		  if status == self.nfc.MI_OK && testing == True:
 		    print "Card detected"
 		  
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
@@ -64,7 +79,7 @@ class Hardware:
 
 
 	def poolCamera(self, queue):
-		while !shutdown:
+		while (shutdown == False):
 			data = camera.getBarcode()
 			if(data != ""):
 				queue.put(data, "Barcode") 
@@ -74,32 +89,39 @@ class Hardware:
 		shutdown = False
 		replyQueue = Queue.Queue()
 
-		thread1 = threading.Thread(poolNFC(self, my_queue))
-		thread2 = threading.Thread(getBarcode(self, my_queue))
+		if(isDeviceActive('nfc') || isDeviceActive('camera') ):
+			if(isDeviceActive('nfc')):
+				thread1 = threading.Thread(poolNFC(self, my_queue))
+				thread1.start()
 
-		thread1.start()
-		thread2.start()
+			if(isDeviceActive('camera')):
+				thread2 = threading.Thread(getBarcode(self, my_queue))
+				thread2.start()
 
-		endTime = datetime.datetime.now()  + datetime.timedelta(minutes = 15)
- 		currentTime = datetime.datetime.now()
+			endTime = datetime.datetime.now()  + datetime.timedelta(minutes = ActiveTime)
+	 		currentTime = datetime.datetime.now()
 
-		while (currentTime < endTime):
-			currentTime = datetime.datetime.now()
+	 		
+			while (currentTime < endTime):
+				currentTime = datetime.datetime.now()
+				if(!replyQueue.empty):
+					data, dataType = queue.get()
+					if data not in dataList:
+						dataList.append(data)
+						displayMessage(dataType + ": " + data)
+
+					
+			shutdown = True
+
+			thread1.join()
+			thread2.join()
+			
 			if(!replyQueue.empty):
-				data, dataType = queue.get()
-				if data not in dataList:
-					dataList.append(data)
-					displayMessage(dataType + ": " + data)
-				
-		shutdown = True
-
-		thread1.join()
-		thread2.join()
-
-		
-		if(!replyQueue.empty):
-			displayMessage("Queue isn't empty")
-		
+				if(testing):
+					displayMessage("Queue isn't empty")
+		else
+			print ("Camera and NFC reader doesn't exist")
+			
 
 if __name__ == '__main__':
    	hardware = Hardware()

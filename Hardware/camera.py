@@ -4,7 +4,7 @@ import cv
 import time
 import zbar
 
-def imageCapture(showImage = False):
+def getBarcode(showImage = False):
 	camera_index = 0
 	capture = cv.CaptureFromCAM(camera_index)
 	time.sleep(0.1)
