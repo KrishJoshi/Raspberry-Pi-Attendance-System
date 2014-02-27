@@ -4,7 +4,7 @@ from time import sleep
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
 import camera
-import configurations
+import config
 from db import database
 
 ''' 
@@ -57,7 +57,7 @@ class Hardware:
 			self.lcd.clear()
 			self.lcd.message(text)
 		else:
-			print ("LCD doesn't exist, using print function")
+			print ("-- LCD doesn't exist, using print function --")
 			print (text)
 
 	shutdown = False
@@ -66,7 +66,7 @@ class Hardware:
 		while (shutdown == False):
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
-		  if status == self.nfc.MI_OK && testing == True:
+		  if (status == self.nfc.MI_OK && config.Testing == True):
 		    print "Card detected"
 		  
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
@@ -114,7 +114,7 @@ class Hardware:
 			thread2.join()
 			
 			if(!replyQueue.empty):
-				if(testing):
+				if(config.Testing == True):
 					displayMessage("Queue isn't empty")
 		else
 			print ("Camera and NFC reader doesn't exist")
