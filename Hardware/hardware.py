@@ -49,8 +49,6 @@ class Hardware:
 	    if(isDeviceActive('nfc')):
 	    	self.nfc =  nfc() 
 	
-	def 
-	
 	def cleanGPIO():
 		GPIO.cleanup()
 	
