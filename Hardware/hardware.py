@@ -117,7 +117,7 @@ class Hardware:
 			
 			if(replyQueue.empty != True and config.Testing == True):
 				displayMessage("Queue isn't empty")
-		else
+		else:
 			print ("Camera and NFC reader doesn't exist")
 			
 
