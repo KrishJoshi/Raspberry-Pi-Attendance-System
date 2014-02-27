@@ -61,7 +61,6 @@ class Hardware:
 		else:
 			print ("LCD doesn't exist, using print function")
 			print (text)
-	def 
 
 	shutdown = False
 	dataList = []
