@@ -110,12 +110,13 @@ class Hardware:
 					
 			shutdown = True
 
-			thread1.join()
-			thread2.join()
+			if(isDeviceActive('nfc')):
+				thread1.join()
+			if(isDeviceActive('camera')):
+				thread2.join()
 			
-			if(!replyQueue.empty):
-				if(config.Testing == True):
-					displayMessage("Queue isn't empty")
+			if(replyQueue.empty != True and config.Testing == True):
+				displayMessage("Queue isn't empty")
 		else
 			print ("Camera and NFC reader doesn't exist")
 			
