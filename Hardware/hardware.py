@@ -68,6 +68,7 @@ class Hardware:
 	def poolNFC(self, queue):
 		if(config.Testing == True):
 			print 'NFC Started'
+		lastCode = ""
 		while (self.shutdown == False):
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
@@ -77,26 +78,32 @@ class Hardware:
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
 		  if status == self.nfc.MI_OK:
 			id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
-			queue.put(id, "RFID") 
-			if(config.Testing == True):
-				print "Data found", id
+			if (id != lastCode):
+				lastCode = id
+				queue.put((id, "RFID")) 
+				if(config.Testing == True):
+					print "Data found", id
 
 
 	def poolCamera(self, queue):
 		if(config.Testing == True):
 			print 'Camera Started'
+		lastCode = ""
 		while (self.shutdown == False):
+			
 			data = camera.getBarcode()
 			if(data != ""):
-				queue.put(data, "Barcode") 
-				if(config.Testing == True):
-					print ('Camera QR', data)
+				if (data != lastCode):
+					lastCode = data
+					queue.put((data, "Barcode")) 
+					if(config.Testing == True):
+						print ('Camera QR', data)
 
 	def poolDevices(self):
 		try:
 			self.shutdown = False
 			replyQueue = Queue.Queue()
-	
+
 			print 'Pool devices'
 			if(self.isDeviceActive('nfc') or self.isDeviceActive('camera') ):
 				if(self.isDeviceActive('nfc')):
@@ -116,9 +123,9 @@ class Hardware:
 					currentTime = datetime.datetime.now()
 					if(replyQueue.empty != True):
 						data, dataType = replyQueue.get()
-						if data not in dataList:
-							dataList.append(data)
-							displayMessage(dataType + ": " + data)
+						if data not in self.dataList:
+							self.dataList.append(data)
+							self.displayMessage(dataType + ": " + data)
 	
 				shutdown = True
 	
@@ -130,10 +137,10 @@ class Hardware:
 				if(replyQueue.empty != True and config.Testing == True):
 					displayMessage("Queue isn't empty")
 			else:
-			print ("Camera and NFC reader doesn't exist")
+				print ("Camera and NFC reader doesn't exist")
 		except:
-			print 'error, now exiting'
-			return
+			e = sys.exc_info()[0]
+			print e
 
 if __name__ == '__main__':
    	hardware = Hardware()

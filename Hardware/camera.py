@@ -35,17 +35,17 @@ def getBarcode():
 	scanner.parse_config('enable')
 	# scan the image for barcodes
 	scanner.scan(image)
-
+	
+	imageData = ""
 	# extract results
 	for symbol in image:
-		if config.Testing == True:
+		imageData = symbol.data
+		#if config.Testing == True:
 	    		# do something useful with results
-	   		print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
+	   		# print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
 
-	try:
-		return image.symbol
-	except:
-		return ""
+	return imageData
+
 
 if __name__ == '__main__':
    	print imageCapture()
