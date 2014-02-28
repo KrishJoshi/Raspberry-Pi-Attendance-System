@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
 from time import sleep
+import datetime
 from lcd_hd44780 import lcd_hd44780 as lcd
 from MFRC522 import MFRC522 as nfc
 import camera
 import config
 from db import database
-import queue
+import Queue
+import threading
 
 ''' 
 	Funct 	NFC 	LCD
@@ -64,7 +66,9 @@ class Hardware:
 	shutdown = False
 	dataList = []
 	def poolNFC(self, queue):
-		while (shutdown == False):
+		if(config.Testing == True):
+			print 'NFC Started'
+		while (self.shutdown == False):
 		  (status,TagType) = self.nfc.MFRC522_Request(self.nfc.PICC_REQIDL)
 		  
 		  if (status == self.nfc.MI_OK and config.Testing == True):
@@ -72,55 +76,64 @@ class Hardware:
 		  
 		  (status,backData) = self.nfc.MFRC522_Anticoll()
 		  if status == self.nfc.MI_OK:
-			 id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
-			 queue.put(id, "RFID") 
+			id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
+			queue.put(id, "RFID") 
+			if(config.Testing == True):
+				print "Data found", id
 
 
 	def poolCamera(self, queue):
-		while (shutdown == False):
+		if(config.Testing == True):
+			print 'Camera Started'
+		while (self.shutdown == False):
 			data = camera.getBarcode()
 			if(data != ""):
 				queue.put(data, "Barcode") 
+				if(config.Testing == True):
+					print ('Camera QR', data)
 
 	def poolDevices(self):
-
-		shutdown = False
-		replyQueue = Queue.Queue()
-
-		if(self.isDeviceActive('nfc') or self.isDeviceActive('camera') ):
-			if(self.isDeviceActive('nfc')):
-				thread1 = threading.Thread(poolNFC(self, my_queue))
-				thread1.start()
-
-			if(self.isDeviceActive('camera')):
-				thread2 = threading.Thread(getBarcode(self, my_queue))
-				thread2.start()
-
-			endTime = datetime.datetime.now()  + datetime.timedelta(minutes = ActiveTime)
-	 		currentTime = datetime.datetime.now()
-
-	 		
-			while (currentTime < endTime):
-				currentTime = datetime.datetime.now()
-				if(replyQueue.empty != True):
-					data, dataType = queue.get()
-					if data not in dataList:
-						dataList.append(data)
-						displayMessage(dataType + ": " + data)
-
-					
-			shutdown = True
-
-			if(self.isDeviceActive('nfc')):
-				thread1.join()
-			if(self.isDeviceActive('camera')):
-				thread2.join()
-			
-			if(replyQueue.empty != True and config.Testing == True):
-				displayMessage("Queue isn't empty")
-		else:
+		try:
+			self.shutdown = False
+			replyQueue = Queue.Queue()
+	
+			print 'Pool devices'
+			if(self.isDeviceActive('nfc') or self.isDeviceActive('camera') ):
+				if(self.isDeviceActive('nfc')):
+					thread1 = threading.Thread(target=self.poolNFC, args=(replyQueue, ))
+					thread1.setDaemon(True)
+					thread1.start()
+	
+				if(self.isDeviceActive('camera')):
+					thread2 = threading.Thread(target=self.poolCamera, args=(replyQueue, ))
+					thread2.setDaemon(True)
+					thread2.start()
+	
+				endTime = datetime.datetime.now()  + datetime.timedelta(seconds = config.ActiveTime)
+		 		currentTime = datetime.datetime.now()
+	
+				while (currentTime < endTime):
+					currentTime = datetime.datetime.now()
+					if(replyQueue.empty != True):
+						data, dataType = replyQueue.get()
+						if data not in dataList:
+							dataList.append(data)
+							displayMessage(dataType + ": " + data)
+	
+				shutdown = True
+	
+				if(self.isDeviceActive('nfc')):
+					thread1.join()
+				if(self.isDeviceActive('camera')):
+					thread2.join()
+				
+				if(replyQueue.empty != True and config.Testing == True):
+					displayMessage("Queue isn't empty")
+			else:
 			print ("Camera and NFC reader doesn't exist")
-			
+		except:
+			print 'error, now exiting'
+			return
 
 if __name__ == '__main__':
    	hardware = Hardware()

@@ -12,9 +12,11 @@ def imageCapture():
 	stream = io.BytesIO()
 
 	with picamera.PiCamera() as camera:
-	    camera.start_preview()
-	    time.sleep(2)
-	    camera.capture(stream, format='jpeg')
+	    #camera.start_preview()
+	    #time.sleep(2)
+	    camera.resolution = (1024,768)
+	    camera.capture(stream, format='Y800')
+	    
 
 	# Construct a numpy array from the stream
 	data = np.fromstring(stream.getvalue(), dtype=np.uint8)
@@ -58,7 +60,7 @@ def getBarcode():
 
 	if (image.symbol != None):
 		return image.symbol
-	else
+	else:
 		return ""
 
 if __name__ == '__main__':

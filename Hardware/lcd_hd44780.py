@@ -70,7 +70,9 @@ class lcd_hd44780:
         # an explicit GPIO interface to use
         if not GPIO:
             import RPi.GPIO as GPIO
+	    GPIO.setwarnings(False)
 	    
+
         self.GPIO = GPIO
         self.pin_rs = pin_rs
         self.pin_e = pin_e

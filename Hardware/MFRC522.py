@@ -372,5 +372,20 @@ class MFRC522:
     self.Write_MFRC522(self.ModeReg, 0x3D)
     self.AntennaOn()
   
+if __name__ == '__main__':
+	nfc = MFRC522()
+	shutdown = False
+	while (shutdown == False):
+	  (status,TagType) = nfc.MFRC522_Request(nfc.PICC_REQIDL)
+		  
+	  if (status == nfc.MI_OK):
+	    print "Card detected"
+	  
+	  (status,backData) = nfc.MFRC522_Anticoll()
+	  if status == nfc.MI_OK:
+		id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
+		
+		print id
+		shutdown = True
 
   
