@@ -46,6 +46,7 @@ class Hardware:
 
 	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
 	    # TODO: Set modes of both arn't set properly - check NFC before test
+	    self.db = database()
 	    if(self.isDeviceActive('lcd')):
 	    	self.lcd = lcd()
 
@@ -55,7 +56,17 @@ class Hardware:
 	def cleanGPIO():
 		GPIO.cleanup()
 	
+	lastMessage = ""
 	def displayMessage(self,text):
+		text = text[:10]
+		if (self.lastMessage != ""):
+			lm = self.lastMessage
+			self.lastMessage = text
+			text = text + " \n " + lm
+			print text
+		else:
+			self.lastMessage = text
+		
 		if(self.isDeviceActive('lcd')):
 			self.lcd.clear()
 			self.lcd.message(text)
@@ -64,7 +75,7 @@ class Hardware:
 			print (text)
 
 	shutdown = False
-	dataList = []
+	dataList = ""
 	def poolNFC(self, queue):
 		if(config.Testing == True):
 			print 'NFC Started'
@@ -80,7 +91,7 @@ class Hardware:
 			id = str(backData[0])+str(backData[1])+str(backData[2])+str(backData[3])+str(backData[4])
 			if (id != lastCode):
 				lastCode = id
-				queue.put((id, "RFID")) 
+				queue.put((id, "nfc")) 
 				if(config.Testing == True):
 					print "Data found", id
 
@@ -95,12 +106,12 @@ class Hardware:
 			if(data != ""):
 				if (data != lastCode):
 					lastCode = data
-					queue.put((data, "Barcode")) 
-					if(config.Testing == True):
-						print ('Camera QR', data)
+					queue.put((data, "barcode")) 
+					#if(config.Testing == True):
+						#print ('barcode', data)
 
 	def poolDevices(self):
-		try:
+		#try:
 			self.shutdown = False
 			replyQueue = Queue.Queue()
 
@@ -123,10 +134,18 @@ class Hardware:
 					currentTime = datetime.datetime.now()
 					if(replyQueue.empty != True):
 						data, dataType = replyQueue.get()
-						if data not in self.dataList:
-							self.dataList.append(data)
-							self.displayMessage(dataType + ": " + data)
-	
+						#if data not in self.dataList:
+						if self.dataList != data:
+							#self.dataList.append(data)
+							self.dataList = data
+							#self.displayMessage(dataType + ": " + data)
+							user = self.db.findTag(data, dataType)
+							if(user == "Not Found"):
+								print user
+								self.displayMessage(user)
+							else:
+								self.displayMessage(user[0][3] + ": " + user[0][2])
+								print user[0][3]
 				shutdown = True
 	
 				if(self.isDeviceActive('nfc')):
@@ -138,9 +157,9 @@ class Hardware:
 					displayMessage("Queue isn't empty")
 			else:
 				print ("Camera and NFC reader doesn't exist")
-		except:
-			e = sys.exc_info()[0]
-			print e
+		#except:
+	#		e = sys.exc_info()[0]
+#			print e
 
 if __name__ == '__main__':
    	hardware = Hardware()
