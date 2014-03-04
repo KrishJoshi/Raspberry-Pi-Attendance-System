@@ -1,0 +1,43 @@
+/*
+We highly recommend you use SASS and write your custom styles in sass/_custom.scss.
+However, this blank file is available if you prefer
+*/
+
+	.navbar h3{
+		color: #fff;
+	}
+
+	.header {
+		text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.55);
+		box-shadow: 0px 0px 5px rgba(1,1,1, 0.7);
+		color: #fff;
+		padding: 60px 20px 20px 20px;
+		border-radius: 2px;
+		margin-bottom: 25px;
+		background-size: 50px 50px;
+		background-color: #1167A0;
+		background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+                  transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+                  transparent 75%, transparent);
+	}
+	.schoolName h1{
+		color: #fff;
+		padding-top: 20px;
+		font-size: 60px;
+		line-height: 65px;
+	}
+	.roomName h1{
+		color: #fff;
+		text-align: right;
+		font-size: 70px;
+		line-height: 100px;
+	}
+
+	.sidebar h1{
+		padding: 0;
+line-height: 43px;
+	}
+
+	.userDetails span {
+		font-weight: bold;
+	}
