@@ -1,5 +1,5 @@
-RoomNumber = "LF 1.1"
-ServerName = ""
+RoomNumber = "1.1"
+ServerName = "http://njdebugger.com/lab/nastasia/AttendanceSystem"
 
 ActiveDevices = ['nfc', 'camera', 'lcd'] # Devices which will be in use
 
