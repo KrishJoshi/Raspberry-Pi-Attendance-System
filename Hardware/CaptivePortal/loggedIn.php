@@ -1,3 +1,34 @@
+<?php 
+
+$ipAddress=$_SERVER['REMOTE_ADDR'];
+$macAddr=false;
+
+#run the external command, break output into lines
+$arp=`arp -a $ipAddress`;
+$lines=explode("\n", $arp);
+
+#look for the output line describing our IP address
+foreach($lines as $line)
+{
+   $cols=preg_split('/\s+/', trim($line));
+   if ($cols[0]==$ipAddress)
+   {
+       $macAddr=$cols[1];
+   }
+}
+
+
+var name = $_POST["name"];
+var studentID = $_POST["studentID"];
+
+if ($name != "")
+	var result = system('python phpConnect.py save ' + $name + " " + $studentID + " " + $macAddr, $retval);
+else {
+	var result = system('python phpConnect.py attend ' + $macAddr, $retval);
+}
+
+?>
+
 <!doctype html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
@@ -13,7 +44,7 @@
 			 More info: h5bp.com/b/378 -->
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title>1.1 Attendence System</title>
+	<title>Attendence System</title>
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
 	<meta name="author" content="humans.txt">
@@ -43,7 +74,7 @@
 </head>
 
 <body>
-	<div class="navbar" id="nav" >
+	<div class="navbar unfixed" gumby-fixed="top" id="nav" style="top: 0px;">
 			<div class="row">
 				<a class="toggle" gumby-trigger="#nav3 &gt; .row &gt; ul" href="#"><i class="icon-menu"></i></a>
 				<h1 class="seven columns logo">
@@ -51,8 +82,9 @@
 						<h3>Attendence System</h3>
 					</a>
 				</h1>
-				<ul class="push_six two columns">
-					<li><a href="#">Login</a></li>
+				<ul class="four columns">
+					<li><a href="#">Logout</a></li>
+					<li><a href="#">Disconnect</a></li>
 					<li>
 						<a href="#">Help</a>
 					</li>
@@ -60,27 +92,32 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="header"><?php echo roomName; ?> 
+			<div class="header">
 				<div class='schoolName'><h1>University Of Manchester</h1></div>
-				<div class="roomName"><h1>Toot 1.4</h1></div>
+				<div class="roomName"><h1>1.1</h1></div>
 			</div>
 		<div class="row">
 			<div class="four columns sidebar"> 
-				<h3 class="lead">Login</h3>
-				<p>Please submit you're details to attend a lecture</p>
+				<h3 class="lead">Current Lecture</h3>
+				<p>Please make sure the details of you're current lecture are corrent, then press submit.</p>
 			</div>
-			<div class="seven columns js">
+			<div class="push_two six columns js" style="
+    margin-top: 45px;
+">
 				<ul>
-				  <li class="field">
-				    <input class="input" type="text" placeholder="Your Name (e.g. John Smith)" />
+				  <li class="userDetails">
+				  	<span>Name: </span> <?php echo $name; ?>
 				  </li>
-				  <li class="field">
-				    <input class="input" type="text" placeholder="Your Student ID (e.g. 8323123)" />
+				  <li class="userDetails">
+				    <span>Current Lecture: </span> COMP23423, Microcontrollers, Toot 1.1
 				  </li>
-				  <li class="field">
+				  <li class="userDetails">
+			 		<span>Current Teacher: </span>	Mr. Jim Garside	 
+			 	  </li>
+			 	  <li class="field">
 			 		<label class="checkbox checked" for="check1">
 					    <input name="checkbox[]" id="check1" value="1" type="checkbox" checked="checked">
-					    <span></span> I declare this is my computer, and I understand I cannot change these details once they are added.
+					    <span></span> I declare these are the correct details
 					  </label>
 				  </li>
 				</ul>
@@ -93,6 +130,11 @@
 	<!-- 2.0 for modern browsers, 1.10 for .oldie -->
 	<script>
 	var oldieCheck = Boolean(document.getElementsByTagName('html')[0].className.match(/\soldie\s/g));
+	if(!oldieCheck) {
+	document.write('<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"><\/script>');
+	} else {
+	document.write('<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"><\/script>');
+	}
 	</script>
 	<script>
 	if(!window.jQuery) {

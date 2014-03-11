@@ -48,6 +48,13 @@ class database:
         command = "DELETE from " + tableName + " where " + lookingFor + ";"
         return self.execute(command, 'Remove')
 
+    def addStudent(self, tag, tagType):
+        row = self.add('backlog', '"' + tag + '", "'+ tagType +'", "' + str(currentTime) + '"')
+        if (row != []):
+            return row
+        else:
+            return "Not Found"
+
     def findTag(self, tag, tagType):
         row = self.find('userTags', 'Tag = "'+ tag +'" AND Type = "'+ tagType +'" ')
         if (row != []):

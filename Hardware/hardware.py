@@ -9,6 +9,7 @@ import config
 from db import database
 import Queue
 import threading
+import json
 
 ''' 
 	Funct 	NFC 	LCD
@@ -18,7 +19,7 @@ import threading
 4:
 5:
 6: 	Ground 	GND 	1 & 16
-7:	IO 4
+7:	IO 4 			4
 8:
 9:
 10:
@@ -33,7 +34,7 @@ import threading
 19: MOSI 	MOSI 	
 20:
 21: MISO 	MISO
-22: IO 25 	RST 	4 
+22: IO 25 	RST 	
 23:	SCK 	SCK
 24: CE0 	SDA
 25: 
@@ -43,6 +44,9 @@ import threading
 class Hardware:
 	def isDeviceActive(self, deviceName):
 		return deviceName in config.ActiveDevices
+
+	def isbuttonPressed():
+		return input = GPIO.input(17)
 
 	def __init__(self, lcd_pin_rs=4, lcd_pin_e=24, lcd_pins_db=[23, 17, 21, 22], GPIO = None):
 	    # TODO: Set modes of both arn't set properly - check NFC before test
@@ -73,6 +77,7 @@ class Hardware:
 		else:
 			print ("-- LCD doesn't exist, using print function --")
 			print (text)
+
 
 	shutdown = False
 	dataList = ""
@@ -133,19 +138,36 @@ class Hardware:
 				while (currentTime < endTime):
 					currentTime = datetime.datetime.now()
 					if(replyQueue.empty != True):
+						# Data receved from one of the devices
+
+						#get the data
 						data, dataType = replyQueue.get()
 						#if data not in self.dataList:
+						# check for repetition
 						if self.dataList != data:
-							#self.dataList.append(data)
 							self.dataList = data
-							#self.displayMessage(dataType + ": " + data)
-							user = self.db.findTag(data, dataType)
-							if(user == "Not Found"):
-								print user
-								self.displayMessage(user)
+
+							userData = json.setAttendence(data, dataType)
+							# If server isn't avalable to be connected to, store data to the db
+							if(userData = "cannot connect"):
+								user = self.db.findTag(data, dataType)
+								self.db.addTag(data, dataType)
+								self.displayMessage("-- Offline --")
+								if (user != "not found"):
+									self.displayMessage(user[0][3] + ": " + user[0][2])
+								else:
+									self.displayMessage(dataType + " tag saved")
 							else:
-								self.displayMessage(user[0][3] + ": " + user[0][2])
-								print user[0][3]
+								if(userData['status'] != False): # If error happens, display a message otherwise the person's name
+									self.displayMessage(userData['name'] + ": " + userData['studentid']) #TODO
+								else:
+									user = self.db.findTag(data, dataType)
+									if (user != "not found"):
+										self.displayMessage("Error: " + userData['message'])
+									else:
+										self.displayMessage(user[0][3] + ": " + userData['message'])
+									print userData
+
 				shutdown = True
 	
 				if(self.isDeviceActive('nfc')):
@@ -153,20 +175,20 @@ class Hardware:
 				if(self.isDeviceActive('camera')):
 					thread2.join()
 				
+				self.cleanGPIO()
+
 				if(replyQueue.empty != True and config.Testing == True):
 					displayMessage("Queue isn't empty")
 			else:
-				print ("Camera and NFC reader doesn't exist")
+				print ("Camera and NFC reader don't exist")
 		#except:
 	#		e = sys.exc_info()[0]
 #			print e
 
 if __name__ == '__main__':
    	hardware = Hardware()
-	hardware.poolDevices()
-	#if id == '63109129125174':
-	#	message = "ID Found"
-	#else:
-	#	message = 'ID Not Found'
-	#hardware.displayMessage(id + '\n' + message)
+   	while True:
+	   	if(hardware.isbuttonPressed()):
+			hardware.poolDevices()
+		time.sleep(0.5)
 	

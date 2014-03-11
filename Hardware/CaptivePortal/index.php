@@ -1,3 +1,30 @@
+<?php 
+$ipAddress=$_SERVER['REMOTE_ADDR'];
+$macAddr=false;
+
+#run the external command, break output into lines
+$arp=`arp -a $ipAddress`;
+$lines=explode("\n", $arp);
+
+#look for the output line describing our IP address
+foreach($lines as $line)
+{
+   $cols=preg_split('/\s+/', trim($line));
+   if ($cols[0]==$ipAddress)
+   {
+       $macAddr=$cols[1];
+   }
+}
+
+var result = system('python phpConnect.py find ' + $macAddr , $retval);
+
+if($result != "Not Found")
+	if($macAddrFound) {
+		header( 'Location: http://10.0.0.1/loggedIn.php' ) ;
+	}
+
+?>
+
 <!doctype html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
@@ -70,12 +97,13 @@
 				<p>Please submit you're details to attend a lecture</p>
 			</div>
 			<div class="seven columns js">
+				<form action="loggedIn.php" method="post">
 				<ul>
 				  <li class="field">
-				    <input class="input" type="text" placeholder="Your Name (e.g. John Smith)" />
+				    <input class="input" name="name" type="text" placeholder="Your Name (e.g. John Smith)" />
 				  </li>
 				  <li class="field">
-				    <input class="input" type="text" placeholder="Your Student ID (e.g. 8323123)" />
+				    <input class="input" name="studentID" type="text" placeholder="Your Student ID (e.g. 8323123)" />
 				  </li>
 				  <li class="field">
 			 		<label class="checkbox checked" for="check1">
@@ -83,8 +111,9 @@
 					    <span></span> I declare this is my computer, and I understand I cannot change these details once they are added.
 					  </label>
 				  </li>
+				  </form>
 				</ul>
-				<div class="medium metro rounded btn primary"><a href="#">Submit</a></div>
+				<input class="medium metro rounded btn primary"><a href="#">Submit</a></input>
 			</div>
 
 		</div>
